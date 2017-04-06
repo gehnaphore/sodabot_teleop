@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(joy_md49)
+project(sodabot_teleop)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -139,8 +139,8 @@ include_directories(
 #   ${catkin_LIBRARIES}
 # )
 
-add_executable(joy_md49_teleop src/joy_md49_teleop.cpp)
-target_link_libraries(joy_md49_teleop ${catkin_LIBRARIES})
+add_executable(sodabot_teleop src/joy_md49_teleop.cpp)
+target_link_libraries(sodabot_teleop ${catkin_LIBRARIES})
 
 #############
 ## Install ##

@@ -61,7 +61,7 @@ TeleopMD49::TeleopMD49():
   headpt_pub_ = nh_.advertise<trajectory_msgs::JointTrajectory>("head_controller/command", 1);
   joy_sub_ = nh_.subscribe<sensor_msgs::Joy>("joy", 10, &TeleopMD49::joyCallback, this);
 
-  mJointStateSubscriber = nh_.subscribe<sensor_msgs::JointState>("joint_states", 1, &TeleopMD49::jointStateCallback, this);
+  mJointStateSubscriber = nh_.subscribe<sensor_msgs::JointState>("joint_states", 20, &TeleopMD49::jointStateCallback, this);
 }
 
 void TeleopMD49::jointStateCallback(const sensor_msgs::JointState::ConstPtr& jointState)
@@ -94,6 +94,7 @@ int TeleopMD49::spin() {
     ros::spinOnce();
 
     if (mCurrentJoystickState.axes.size() > 0) {
+
       geometry_msgs::Twist twist;
       twist.angular.z = a_scale_*mCurrentJoystickState.axes[angular_];
       twist.linear.x = l_scale_*mCurrentJoystickState.axes[linear_];
@@ -104,16 +105,25 @@ int TeleopMD49::spin() {
       double headPanV = mCurrentJoystickState.axes[m_headPanAxis] * m_headPanScale;
       double headTiltV = mCurrentJoystickState.axes[m_headTiltAxis] * m_headTiltScale;
 
-      if ((fabs(headPanV) > 0.001) || (fabs(headTiltV) > 0.001) || m_centerHeadPending) {
+      if ((fabs(headPanV) > 0.01) || (fabs(headTiltV) > 0.01)) m_centerHeadPending = false;
+
+      if (m_centerHeadPending) {
+        headJoints.joint_names.push_back("head_pan_joint");
+        p.positions.push_back(0);
+        headJoints.joint_names.push_back("head_tilt_joint");
+        p.positions.push_back(0);
+      } else {
+        if (fabs(headPanV) < 0.00001) headPanV = 0;
         double headPanP = m_centerHeadPending ? 0 : (m_currentHeadPan + headPanV * loop_rate.expectedCycleTime().toSec());
         headJoints.joint_names.push_back("head_pan_joint");
         p.positions.push_back(headPanP);
+        p.velocities.push_back(headPanV*0.6);
 
+        if (fabs(headTiltV) < 0.01) headTiltV = 0;
         double headTiltP = m_centerHeadPending ? 0 : (m_currentHeadTilt + headTiltV * loop_rate.expectedCycleTime().toSec());
         headJoints.joint_names.push_back("head_tilt_joint");
         p.positions.push_back(headTiltP);
-
-        m_centerHeadPending = false;
+        p.velocities.push_back(headTiltV*1.5);
       }
 
       if (p.positions.size() > 0) {
@@ -122,7 +132,6 @@ int TeleopMD49::spin() {
         headpt_pub_.publish(headJoints);
       }
 
-      printf("az=%lf, lx=%lf\n",twist.angular.z,twist.linear.x);
       vel_pub_.publish(twist);
     }
 
@@ -134,7 +143,7 @@ int TeleopMD49::spin() {
 }
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "joy_md49");
+  ros::init(argc, argv, "sodabot_teleop");
   TeleopMD49 teleop_md49;
   teleop_md49.spin();
 }
