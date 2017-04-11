@@ -7,7 +7,6 @@ project(sodabot_teleop)
 find_package(catkin REQUIRED COMPONENTS
   joy
   roscpp
-  md49_messages
 )
 
 ## System dependencies are found with CMake's conventions

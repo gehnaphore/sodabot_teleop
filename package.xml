@@ -42,11 +42,9 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>joy</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>md49_messages</build_depend>
   <build_depend>trajectory_msgs</build_depend>
   <run_depend>joy</run_depend>
   <run_depend>roscpp</run_depend>
-  <run_depend>md49_messages</run_depend>
   <run_depend>trajectory_msgs</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
